@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky Spin - Exclusive Rewards</title>
+    <title>Lucky Wheel - Spin & Win</title>
     
     <!-- 1. Tailwind CSS (Styling) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -12,17 +12,17 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <!-- 3. Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
 
-    <!-- 4. Confetti Library (Celebration Effect) -->
+    <!-- 4. Confetti Effect -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         body { font-family: 'Poppins', sans-serif; }
         
-        /* Custom Shadow for the wheel */
-        .wheel-shadow {
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3), 0 4px 6px -2px rgba(0, 0, 0, 0.1), inset 0 0 20px rgba(0,0,0,0.2);
+        /* Custom Shadows */
+        .wheel-container {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0,0,0,0.2);
         }
         
         /* Modal Animation */
@@ -36,97 +36,113 @@
 <body class="bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 min-h-screen flex flex-col items-center justify-center text-white overflow-hidden p-4">
 
     <!-- HEADER -->
-    <div class="text-center mb-6 z-10">
-        <div class="inline-block bg-white/20 backdrop-blur-sm px-4 py-1 rounded-full text-sm font-semibold mb-2 border border-white/20">
-            <i class="fa-solid fa-star text-yellow-300 mr-1"></i> SPECIAL EVENT
+    <div class="text-center mb-8 z-10">
+        <div class="inline-block bg-white/20 backdrop-blur-md px-4 py-1 rounded-full text-xs font-bold mb-2 border border-white/20 uppercase tracking-widest">
+            ✨ Special Event
         </div>
-        <h1 class="text-4xl md:text-5xl font-extrabold drop-shadow-lg tracking-tight">LUCKY WHEEL</h1>
-        <p class="text-white/80 mt-2 text-sm md:text-base">Spin now to unlock your exclusive gift!</p>
+        <h1 class="text-4xl md:text-6xl font-black drop-shadow-2xl uppercase text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500">
+            LUCKY<br>WHEEL
+        </h1>
+        <p class="text-white/70 mt-2 text-sm md:text-base">Spin the wheel - Get your reward!</p>
     </div>
 
     <!-- WHEEL CONTAINER -->
-    <div class="relative z-10">
+    <div class="relative z-10 group">
         <!-- Pointer (Triangle) -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-20 w-0 h-0 border-l-[20px] border-l-transparent border-r-[20px] border-r-transparent border-t-[30px] border-t-yellow-400 drop-shadow-lg"></div>
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 z-20 drop-shadow-lg">
+            <i class="fa-solid fa-location-dot text-5xl text-red-500"></i>
+        </div>
         
-        <!-- The Wheel (Canvas) -->
-        <div class="wheel-shadow rounded-full border-4 border-white/30 backdrop-blur-sm p-2 bg-white/10">
+        <!-- Canvas Wheel -->
+        <div class="wheel-container rounded-full border-8 border-white/10 p-2 bg-white/5 backdrop-blur-sm">
             <canvas id="wheelCanvas" width="340" height="340" class="rounded-full transition-transform duration-[4000ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]"></canvas>
         </div>
         
-        <!-- Center Decoration -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full shadow-inner flex items-center justify-center border-4 border-purple-200">
-            <i class="fa-solid fa-gift text-2xl text-purple-600"></i>
+        <!-- Center Cap -->
+        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full shadow-inner flex items-center justify-center border-4 border-purple-200 z-10">
+            <i class="fa-solid fa-gift text-2xl text-purple-600 animate-pulse"></i>
         </div>
     </div>
 
     <!-- ACTION BUTTON -->
-    <button id="spinBtn" class="mt-10 group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white transition-all duration-200 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 hover:scale-105 shadow-lg shadow-orange-500/50 z-10">
+    <button id="spinBtn" class="mt-10 relative inline-flex items-center justify-center px-12 py-4 text-xl font-black text-white transition-all duration-200 bg-gradient-to-r from-yellow-400 to-orange-600 rounded-full focus:outline-none hover:scale-105 shadow-[0_0_20px_rgba(255,165,0,0.5)] z-10">
         <span class="mr-2">SPIN NOW</span>
-        <i class="fa-solid fa-arrows-rotate group-hover:animate-spin"></i>
+        <i class="fa-solid fa-play"></i>
     </button>
 
     <!-- FOOTER -->
     <p class="mt-8 text-xs text-white/40">Powered by YourBrand © 2025</p>
 
     <!-- RESULT MODAL (Hidden by default) -->
-    <div id="resultModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm hidden">
-        <div class="bg-white text-gray-800 rounded-2xl p-6 md:p-8 w-full max-w-sm mx-4 text-center shadow-2xl modal-enter relative">
+    <div id="resultModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm hidden">
+        <div class="bg-white text-gray-800 rounded-3xl p-6 w-full max-w-sm mx-4 text-center shadow-2xl modal-enter border-4 border-yellow-400 relative">
             
             <!-- Close Button -->
-            <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600">
-                <i class="fa-solid fa-xmark text-xl"></i>
+            <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
+                <i class="fa-solid fa-xmark text-2xl"></i>
             </button>
 
-            <!-- Icon -->
-            <div class="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-500 text-4xl shadow-inner">
+            <!-- Trophy Icon -->
+            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3 text-yellow-500 text-4xl shadow-inner">
                 <i class="fa-solid fa-trophy"></i>
             </div>
 
-            <h2 class="text-2xl font-extrabold text-gray-900 mb-1">CONGRATULATIONS!</h2>
-            <p class="text-gray-500 text-sm mb-4">You have won:</p>
+            <h2 class="text-xl font-bold text-gray-900 uppercase">CONGRATULATIONS!</h2>
+            <p class="text-gray-500 text-sm">You have won:</p>
             
-            <!-- Prize Name -->
-            <div id="prizeResult" class="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 mb-6 py-1">
-                Loading...
+            <!-- Winning Result Text -->
+            <div id="prizeResult" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 my-4 py-2 border-b border-dashed border-gray-200">
+                ...
             </div>
-
-            <!-- CTA Button -->
-            <a id="smsLink" href="#" class="block w-full bg-[#25D366] hover:bg-[#128C7E] text-white font-bold py-3 px-4 rounded-xl transition-colors shadow-lg shadow-green-200 mb-3 flex items-center justify-center gap-2">
-                <i class="fa-solid fa-comment-sms"></i>
-                CLAIM VIA SMS
-            </a>
             
-            <p class="text-xs text-gray-400 mt-2">Click the button to send the code to us!</p>
+            <p class="text-xs text-gray-400 mb-3">Choose how to claim your prize:</p>
+
+            <!-- ACTION BUTTONS -->
+            <div class="flex flex-col gap-3">
+                <!-- WhatsApp Button -->
+                <a id="waLink" href="#" target="_blank" class="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#1ebc57] text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform hover:-translate-y-1">
+                    <i class="fa-brands fa-whatsapp text-2xl"></i>
+                    <span>Claim via WhatsApp</span>
+                </a>
+
+                <!-- SMS Button -->
+                <a id="smsLink" href="#" class="flex items-center justify-center gap-3 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform hover:-translate-y-1">
+                    <i class="fa-solid fa-comment-sms text-xl"></i>
+                    <span>Claim via SMS</span>
+                </a>
+            </div>
         </div>
     </div>
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        /**
-         * ⚙️ CONFIGURATION
-         * Customize your prizes and phone number here
-         */
-        const PHONE_NUMBER = "0912345678"; // Your Shop's Phone Number
+        /* ================= CONFIGURATION (EDIT HERE) ================= */
         
+        // Your Phone Number
+        // Tip: For WhatsApp, it's best to use International Format without '+' (e.g., 84912345678)
+        const SHOP_PHONE_NUMBER = "84912345678"; 
+        
+        // Prize List & Probability (Percent)
+        // Ensure 'percent' values sum up roughly to 100 (or logic will handle it)
+        // percent: 0 means impossible to win.
         const PRIZES = [
-            { label: "10% OFF",   color: "#FF6B6B", text: "#FFFFFF" },
-            { label: "Free Ship", color: "#4ECDC4", text: "#FFFFFF" },
-            { label: "Gift Box",  color: "#45B7D1", text: "#FFFFFF" },
-            { label: "No Luck",   color: "#95A5A6", text: "#FFFFFF" }, // You can set logic to avoid this
-            { label: "20% OFF",   color: "#FFA07A", text: "#FFFFFF" },
-            { label: "Voucher 5$",color: "#9B59B6", text: "#FFFFFF" },
+            { label: "10% OFF",   color: "#FF6B6B", text: "#FFF", percent: 40 }, // 40% Chance
+            { label: "Free Ship", color: "#4ECDC4", text: "#FFF", percent: 30 }, // 30% Chance
+            { label: "Gift Box",  color: "#FFE66D", text: "#555", percent: 5 },  // 5% Chance (Rare)
+            { label: "Good Luck", color: "#d1d5db", text: "#555", percent: 25 }, // 25% Miss
+            { label: "50% OFF",   color: "#FF9F43", text: "#FFF", percent: 0 },  // 0% (Impossible)
+            { label: "Jackpot",   color: "#9B59B6", text: "#FFF", percent: 0 },  // 0% (Impossible)
         ];
 
-        /**
-         * 🎨 WHEEL DRAWING LOGIC (Using HTML5 Canvas)
-         */
+        /* ============================================================= */
+
         const canvas = document.getElementById('wheelCanvas');
         const ctx = canvas.getContext('2d');
         const spinBtn = document.getElementById('spinBtn');
         const modal = document.getElementById('resultModal');
         const prizeResultText = document.getElementById('prizeResult');
         const smsLinkBtn = document.getElementById('smsLink');
+        const waLinkBtn = document.getElementById('waLink');
 
         const centerX = canvas.width / 2;
         const centerY = canvas.height / 2;
@@ -135,122 +151,109 @@
         const TAU = 2 * PI;
         const arc = TAU / PRIZES.length;
 
-        let currentRotation = 0; // Cumulative rotation
+        let currentRotation = 0;
 
-        // Draw the wheel
+        // --- 1. DRAW WHEEL ---
         function drawWheel() {
             PRIZES.forEach((prize, i) => {
-                const angle = i * arc - PI / 2; // Start from top (-90deg)
-
-                // 1. Draw Segment
+                const angle = i * arc - PI / 2; 
+                
+                // Draw Segment
                 ctx.beginPath();
                 ctx.moveTo(centerX, centerY);
                 ctx.arc(centerX, centerY, radius, angle, angle + arc);
                 ctx.fillStyle = prize.color;
                 ctx.fill();
-                ctx.stroke(); // Separate lines
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = "#ffffff";
+                ctx.stroke();
 
-                // 2. Draw Text
+                // Draw Text
                 ctx.save();
                 ctx.translate(centerX, centerY);
-                ctx.rotate(angle + arc / 2); // Rotate to center of segment
+                ctx.rotate(angle + arc / 2);
                 ctx.textAlign = "right";
                 ctx.fillStyle = prize.text;
-                ctx.font = "bold 18px Poppins";
-                ctx.fillText(prize.label, radius - 20, 5); // Text position
+                ctx.font = "bold 15px Poppins";
+                ctx.fillText(prize.label, radius - 20, 5);
                 ctx.restore();
             });
         }
+        drawWheel(); // Initial Render
 
-        drawWheel(); // Initial render
+        // --- 2. WEIGHTED RANDOM LOGIC ---
+        function getWeightedWinner() {
+            const totalWeight = PRIZES.reduce((sum, prize) => sum + prize.percent, 0);
+            let random = Math.random() * totalWeight;
+            
+            for (let i = 0; i < PRIZES.length; i++) {
+                if (random < PRIZES[i].percent) return i;
+                random -= PRIZES[i].percent;
+            }
+            return 0;
+        }
 
-        /**
-         * 🎰 SPIN LOGIC
-         */
+        // --- 3. SPIN HANDLER ---
         spinBtn.addEventListener('click', () => {
-            // Disable button
+            // Disable button immediately
             spinBtn.disabled = true;
             spinBtn.classList.add('opacity-50', 'cursor-not-allowed');
             spinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> SPINNING...';
 
-            // Calculate Random Spin
-            // Min 5 spins (360 * 5) + Random Stop
-            const randomStop = Math.floor(Math.random() * 360);
-            const spins = 360 * 8; // 8 full rotations
-            const totalDegrees = spins + randomStop;
+            const winningIndex = getWeightedWinner();
             
-            // Update rotation global variable
-            currentRotation += totalDegrees;
+            // Calculate Rotation
+            const segmentAngle = 360 / PRIZES.length;
+            const randomOffset = (Math.random() * segmentAngle * 0.8) - (segmentAngle * 0.4);
+            const winningAnglePosition = winningIndex * segmentAngle; 
+            
+            // Spin 5 times (1800deg) + Angle to target
+            const targetRotation = (360 * 5) + (360 - winningAnglePosition) + randomOffset;
+            const currentMod = currentRotation % 360;
+            currentRotation = currentRotation - currentMod + targetRotation;
 
-            // Apply CSS Transition
+            // Apply CSS Transform
             canvas.style.transform = `rotate(${currentRotation}deg)`;
 
-            // Wait for animation to finish (4s matches CSS duration)
+            // Wait for animation (4s)
             setTimeout(() => {
-                handleResult(currentRotation);
+                showResult(PRIZES[winningIndex].label);
                 
-                // Reset Button
-                spinBtn.disabled = false;
-                spinBtn.classList.remove('opacity-50', 'cursor-not-allowed');
-                spinBtn.innerHTML = '<span class="mr-2">SPIN AGAIN</span> <i class="fa-solid fa-arrows-rotate"></i>';
+                // Update Button State to "Claimed"
+                spinBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> CLAIMED';
             }, 4000);
         });
 
-        /**
-         * 🏆 RESULT & SMS HANDLER
-         */
-        function handleResult(actualRotation) {
-            // Normalize rotation to 0-360
-            const degrees = actualRotation % 360;
-            
-            // Calculate index (Logic: Pointer is at top (270deg in CSS terms usually, but here 0 visual))
-            // The wheel rotates Clockwise. The segment passing the top is the winner.
-            // 360 - degrees gives us the offset from top.
-            const index = Math.floor((360 - degrees + (360/PRIZES.length)/2 ) % 360 / (360/PRIZES.length));
-            
-            // Safe guard index
-            const winningIndex = index % PRIZES.length;
-            const winner = PRIZES[winningIndex];
+        // --- 4. SHOW RESULT & GENERATE LINKS ---
+        function showResult(prizeName) {
+            prizeResultText.innerText = prizeName;
 
-            // Show Result
-            showModal(winner.label);
-        }
+            // Confetti Effect (Only if it's not a "Miss")
+            if (!prizeName.toLowerCase().includes("good luck") && !prizeName.toLowerCase().includes("try again")) {
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            }
 
-        function showModal(prizeText) {
-            // 1. Set Text
-            prizeResultText.innerText = prizeText;
-
-            // 2. Confetti Effect (Fireworks)
-            confetti({
-                particleCount: 150,
-                spread: 70,
-                origin: { y: 0.6 },
-                colors: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F43']
-            });
-
-            // 3. Generate SMS Link
-            const message = `Hello! I won [${prizeText}] from the Lucky Wheel. My Order ID is: `;
+            // Message Content
+            const message = `Hello Shop, I just won [${prizeName}] on the Lucky Wheel. Please claim my reward!`;
             const encodedMsg = encodeURIComponent(message);
             
-            // Detect iOS vs Android for correct SMS delimiter
+            // --- A. SMS LINK ---
             const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const delimiter = isIOS ? '&' : '?';
-            
-            smsLinkBtn.href = `sms:${PHONE_NUMBER}${delimiter}body=${encodedMsg}`;
+            smsLinkBtn.href = `sms:${SHOP_PHONE_NUMBER}${delimiter}body=${encodedMsg}`;
 
-            // 4. Show Modal
+            // --- B. WHATSAPP LINK ---
+            // Ensure phone number is clean (no spaces, no +)
+            let waPhone = SHOP_PHONE_NUMBER.replace(/\D/g, ''); 
+            waLinkBtn.href = `https://wa.me/${waPhone}?text=${encodedMsg}`;
+
+            // Show Modal
             modal.classList.remove('hidden');
         }
 
         function closeModal() {
             modal.classList.add('hidden');
         }
-
-        // Close modal when clicking outside
-        modal.addEventListener('click', (e) => {
-            if (e.target === modal) closeModal();
-        });
-
     </script>
 </body>
 </html>
