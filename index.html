@@ -3,256 +3,412 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lucky Wheel - Spin & Win</title>
+    <title>Lucky Wheel - Review & Win</title>
     
-    <!-- 1. Tailwind CSS (Styling) -->
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
-    <!-- 2. FontAwesome (Icons) -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- 3. Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
 
-    <!-- 4. Confetti Effect -->
+    <!-- Confetti -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
     <style>
         body { font-family: 'Poppins', sans-serif; }
         
-        /* Custom Shadows */
-        .wheel-container {
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), inset 0 0 20px rgba(0,0,0,0.2);
-        }
-        
-        /* Modal Animation */
         .modal-enter { animation: modalPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
         @keyframes modalPop {
             0% { transform: scale(0.5); opacity: 0; }
             100% { transform: scale(1); opacity: 1; }
         }
+
+        /* Animation for the green text when done */
+        .fade-in-green {
+            animation: fadeInGreen 0.5s ease-in forwards;
+            color: #16a34a; /* Green-600 */
+            font-weight: 800;
+            transform: scale(1.05);
+        }
+        @keyframes fadeInGreen {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1.05); }
+        }
+
+        .btn-disabled {
+            background-color: #9CA3AF !important;
+            cursor: not-allowed;
+            pointer-events: none;
+            filter: grayscale(100%);
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-indigo-900 via-purple-800 to-pink-700 min-h-screen flex flex-col items-center justify-center text-white overflow-hidden p-4">
+<body class="bg-slate-900 min-h-screen flex flex-col items-center justify-center text-white overflow-hidden p-4">
 
     <!-- HEADER -->
-    <div class="text-center mb-8 z-10">
-        <div class="inline-block bg-white/20 backdrop-blur-md px-4 py-1 rounded-full text-xs font-bold mb-2 border border-white/20 uppercase tracking-widest">
-            ✨ Special Event
-        </div>
-        <h1 class="text-4xl md:text-6xl font-black drop-shadow-2xl uppercase text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-500">
-            LUCKY<br>WHEEL
+    <div class="text-center mb-6 z-10 transition-opacity duration-500" id="headerSection">
+        <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 uppercase drop-shadow-lg">
+            Lucky Wheel
         </h1>
-        <p class="text-white/70 mt-2 text-sm md:text-base">Spin the wheel - Get your reward!</p>
+        <p class="text-slate-400 text-sm mt-2">Spin to win exclusive rewards!</p>
     </div>
 
-    <!-- WHEEL CONTAINER -->
-    <div class="relative z-10 group">
-        <!-- Pointer (Triangle) -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-6 z-20 drop-shadow-lg">
-            <i class="fa-solid fa-location-dot text-5xl text-red-500"></i>
+    <!-- WHEEL SECTION -->
+    <div id="wheelSection" class="relative z-10 flex flex-col items-center transition-opacity duration-500">
+        <div class="relative w-[340px] h-[340px]">
+            <!-- Pointer -->
+            <div class="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-4 z-20 text-red-500 text-5xl drop-shadow-lg">
+                <i class="fa-solid fa-caret-down"></i>
+            </div>
+            
+            <!-- Canvas -->
+            <div class="w-full h-full rounded-full border-4 border-white/20 p-2 bg-white/5 shadow-2xl backdrop-blur-sm">
+                <canvas id="wheelCanvas" width="320" height="320" class="rounded-full transition-transform duration-[4000ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]"></canvas>
+            </div>
+
+            <!-- Center Logo -->
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full shadow-lg flex items-center justify-center border-4 border-orange-100 z-10">
+                <i class="fa-solid fa-gift text-2xl text-orange-500"></i>
+            </div>
         </div>
-        
-        <!-- Canvas Wheel -->
-        <div class="wheel-container rounded-full border-8 border-white/10 p-2 bg-white/5 backdrop-blur-sm">
-            <canvas id="wheelCanvas" width="340" height="340" class="rounded-full transition-transform duration-[4000ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]"></canvas>
+
+        <button id="spinBtn" class="mt-8 px-10 py-4 bg-gradient-to-r from-yellow-500 to-orange-600 rounded-full font-bold text-xl shadow-lg hover:scale-105 transition-transform active:scale-95">
+            SPIN NOW
+        </button>
+    </div>
+
+    <!-- ALREADY SPUN MESSAGE -->
+    <div id="alreadySpunMsg" class="hidden text-center z-10">
+        <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <i class="fa-solid fa-check text-4xl"></i>
         </div>
-        
-        <!-- Center Cap -->
-        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-white rounded-full shadow-inner flex items-center justify-center border-4 border-purple-200 z-10">
-            <i class="fa-solid fa-gift text-2xl text-purple-600 animate-pulse"></i>
+        <h2 class="text-2xl font-bold">You have already played!</h2>
+        <p class="text-slate-400 mb-6">Click below to see your reward again.</p>
+        <button id="viewRewardBtn" class="px-8 py-3 bg-blue-600 rounded-xl font-bold hover:bg-blue-500 transition">
+            View My Reward
+        </button>
+    </div>
+
+    <!-- RESULT MODAL -->
+    <div id="resultModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md hidden overflow-y-auto py-10">
+        <div class="bg-white text-slate-800 rounded-2xl w-full max-w-md mx-4 p-6 shadow-2xl modal-enter relative">
+            
+            <!-- 1. Header & Prize -->
+            <div class="text-center">
+                <h2 class="text-2xl font-black uppercase text-slate-800">Congratulations!</h2>
+                <p class="text-sm text-slate-500 mt-1">You've won:</p>
+                <div id="prizeResult" class="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 my-2">
+                    ...
+                </div>
+            </div>
+
+            <hr class="border-slate-100 my-4">
+
+            <!-- 2. Progress Bar & Dynamic Status -->
+            <div class="mb-6">
+                <div class="flex justify-between text-xs font-bold text-slate-500 mb-1">
+                    <span>Processing...</span>
+                    <span id="timerText">0%</span>
+                </div>
+                <div class="w-full bg-slate-200 rounded-full h-3 overflow-hidden">
+                    <div id="progressBar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-3 rounded-full w-0"></div>
+                </div>
+                
+                <!-- DYNAMIC STATUS TEXT -->
+                <p id="statusMessage" class="text-xs text-center text-blue-500 font-semibold mt-3 animate-pulse transition-all duration-300">
+                    <i class="fa-solid fa-gear fa-spin mr-1"></i> Creating your reward code...
+                </p>
+            </div>
+
+            <!-- 3. Review Section with TEXT AREA -->
+            <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 mb-4">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-brands fa-amazon text-2xl text-slate-800"></i>
+                    <p class="text-sm font-semibold leading-tight">While waiting, please review us on Amazon!</p>
+                </div>
+                
+                <!-- NEW: Text Area -->
+                <textarea 
+                    id="reviewInput" 
+                    class="w-full p-3 border border-slate-300 rounded-lg text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-orange-400 mb-3 resize-none" 
+                    rows="3" 
+                    placeholder="Write your review here... (Click tags below to auto-fill)"></textarea>
+
+                <p class="text-[10px] text-slate-400 mb-2 uppercase font-bold tracking-wider">Tap tags to add:</p>
+                <div id="tagsContainer" class="flex flex-wrap gap-2 mb-4"></div>
+
+                <button id="copyBtn" class="w-full bg-[#FF9900] hover:bg-[#ff8c00] text-white font-bold py-3 rounded-lg shadow-md transition-transform active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-copy"></i>
+                    <span>Copy Text & Go to Amazon</span>
+                </button>
+            </div>
+
+            <!-- 4. Claim Buttons -->
+            <div class="text-center">
+                <p class="text-xs text-slate-400 mb-2">Your reward link will appear below:</p>
+                <div class="flex gap-2">
+                    <a id="waLink" href="#" target="_blank" class="btn-disabled flex-1 bg-[#25D366] text-white font-bold py-3 px-2 rounded-lg shadow-md flex items-center justify-center gap-2 transition-all">
+                        <i class="fa-brands fa-whatsapp text-xl"></i> WhatsApp
+                    </a>
+                    <a id="smsLink" href="#" class="btn-disabled flex-1 bg-blue-500 text-white font-bold py-3 px-2 rounded-lg shadow-md flex items-center justify-center gap-2 transition-all">
+                        <i class="fa-solid fa-comment-sms text-xl"></i> SMS
+                    </a>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <!-- ACTION BUTTON -->
-    <button id="spinBtn" class="mt-10 relative inline-flex items-center justify-center px-12 py-4 text-xl font-black text-white transition-all duration-200 bg-gradient-to-r from-yellow-400 to-orange-600 rounded-full focus:outline-none hover:scale-105 shadow-[0_0_20px_rgba(255,165,0,0.5)] z-10">
-        <span class="mr-2">SPIN NOW</span>
-        <i class="fa-solid fa-play"></i>
+    <!-- Hidden Reset Button (Bottom Right) -->
+    <button onclick="resetApp()" class="fixed bottom-2 right-2 text-[10px] text-slate-600 opacity-50 hover:opacity-100">
+        Reset App
     </button>
 
-    <!-- FOOTER -->
-    <p class="mt-8 text-xs text-white/40">Powered by YourBrand © 2025</p>
-
-    <!-- RESULT MODAL (Hidden by default) -->
-    <div id="resultModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-sm hidden">
-        <div class="bg-white text-gray-800 rounded-3xl p-6 w-full max-w-sm mx-4 text-center shadow-2xl modal-enter border-4 border-yellow-400 relative">
-            
-            <!-- Close Button -->
-            <button onclick="closeModal()" class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
-                <i class="fa-solid fa-xmark text-2xl"></i>
-            </button>
-
-            <!-- Trophy Icon -->
-            <div class="w-20 h-20 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-3 text-yellow-500 text-4xl shadow-inner">
-                <i class="fa-solid fa-trophy"></i>
-            </div>
-
-            <h2 class="text-xl font-bold text-gray-900 uppercase">CONGRATULATIONS!</h2>
-            <p class="text-gray-500 text-sm">You have won:</p>
-            
-            <!-- Winning Result Text -->
-            <div id="prizeResult" class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600 my-4 py-2 border-b border-dashed border-gray-200">
-                ...
-            </div>
-            
-            <p class="text-xs text-gray-400 mb-3">Choose how to claim your prize:</p>
-
-            <!-- ACTION BUTTONS -->
-            <div class="flex flex-col gap-3">
-                <!-- WhatsApp Button -->
-                <a id="waLink" href="#" target="_blank" class="flex items-center justify-center gap-3 w-full bg-[#25D366] hover:bg-[#1ebc57] text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform hover:-translate-y-1">
-                    <i class="fa-brands fa-whatsapp text-2xl"></i>
-                    <span>Claim via WhatsApp</span>
-                </a>
-
-                <!-- SMS Button -->
-                <a id="smsLink" href="#" class="flex items-center justify-center gap-3 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition-transform hover:-translate-y-1">
-                    <i class="fa-solid fa-comment-sms text-xl"></i>
-                    <span>Claim via SMS</span>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- JAVASCRIPT LOGIC -->
+    <!-- JAVASCRIPT -->
     <script>
-        /* ================= CONFIGURATION (EDIT HERE) ================= */
-        
-        // Your Phone Number
-        // Tip: For WhatsApp, it's best to use International Format without '+' (e.g., 84912345678)
-        const SHOP_PHONE_NUMBER = "84912345678"; 
-        
-        // Prize List & Probability (Percent)
-        // Ensure 'percent' values sum up roughly to 100 (or logic will handle it)
-        // percent: 0 means impossible to win.
-        const PRIZES = [
-            { label: "10% OFF",   color: "#FF6B6B", text: "#FFF", percent: 40 }, // 40% Chance
-            { label: "Free Ship", color: "#4ECDC4", text: "#FFF", percent: 30 }, // 30% Chance
-            { label: "Gift Box",  color: "#FFE66D", text: "#555", percent: 5 },  // 5% Chance (Rare)
-            { label: "Good Luck", color: "#d1d5db", text: "#555", percent: 25 }, // 25% Miss
-            { label: "50% OFF",   color: "#FF9F43", text: "#FFF", percent: 0 },  // 0% (Impossible)
-            { label: "Jackpot",   color: "#9B59B6", text: "#FFF", percent: 0 },  // 0% (Impossible)
-        ];
-
-        /* ============================================================= */
-
-        const canvas = document.getElementById('wheelCanvas');
-        const ctx = canvas.getContext('2d');
-        const spinBtn = document.getElementById('spinBtn');
-        const modal = document.getElementById('resultModal');
-        const prizeResultText = document.getElementById('prizeResult');
-        const smsLinkBtn = document.getElementById('smsLink');
-        const waLinkBtn = document.getElementById('waLink');
-
-        const centerX = canvas.width / 2;
-        const centerY = canvas.height / 2;
-        const radius = canvas.width / 2;
-        const PI = Math.PI;
-        const TAU = 2 * PI;
-        const arc = TAU / PRIZES.length;
-
-        let currentRotation = 0;
-
-        // --- 1. DRAW WHEEL ---
-        function drawWheel() {
-            PRIZES.forEach((prize, i) => {
-                const angle = i * arc - PI / 2; 
-                
-                // Draw Segment
-                ctx.beginPath();
-                ctx.moveTo(centerX, centerY);
-                ctx.arc(centerX, centerY, radius, angle, angle + arc);
-                ctx.fillStyle = prize.color;
-                ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = "#ffffff";
-                ctx.stroke();
-
-                // Draw Text
-                ctx.save();
-                ctx.translate(centerX, centerY);
-                ctx.rotate(angle + arc / 2);
-                ctx.textAlign = "right";
-                ctx.fillStyle = prize.text;
-                ctx.font = "bold 15px Poppins";
-                ctx.fillText(prize.label, radius - 20, 5);
-                ctx.restore();
-            });
-        }
-        drawWheel(); // Initial Render
-
-        // --- 2. WEIGHTED RANDOM LOGIC ---
-        function getWeightedWinner() {
-            const totalWeight = PRIZES.reduce((sum, prize) => sum + prize.percent, 0);
-            let random = Math.random() * totalWeight;
+        document.addEventListener("DOMContentLoaded", () => {
             
-            for (let i = 0; i < PRIZES.length; i++) {
-                if (random < PRIZES[i].percent) return i;
-                random -= PRIZES[i].percent;
+            /* ================= CONFIGURATION ================= */
+            const CONFIG = {
+                shopPhone: "84912345678", 
+                amazonUrl: "https://www.amazon.com", 
+                timerSeconds: 47, 
+                reviewTags: [
+                    "High Quality", "Fast Shipping", "Great Packaging", 
+                    "Excellent Service", "Worth the money", "Love it!"
+                ],
+                prizes: [
+                    { label: "10% OFF",   color: "#FF6B6B", text: "#FFF", percent: 40 },
+                    { label: "Free Ship", color: "#4ECDC4", text: "#FFF", percent: 30 },
+                    { label: "Gift Box",  color: "#FFE66D", text: "#555", percent: 5 },
+                    { label: "Good Luck", color: "#d1d5db", text: "#555", percent: 25 },
+                    { label: "50% OFF",   color: "#FF9F43", text: "#FFF", percent: 0 },
+                ]
+            };
+
+            /* ================= SELECTORS ================= */
+            const els = {
+                wheelCanvas: document.getElementById('wheelCanvas'),
+                spinBtn: document.getElementById('spinBtn'),
+                wheelSection: document.getElementById('wheelSection'),
+                alreadySpunMsg: document.getElementById('alreadySpunMsg'),
+                viewRewardBtn: document.getElementById('viewRewardBtn'),
+                modal: document.getElementById('resultModal'),
+                prizeResult: document.getElementById('prizeResult'),
+                progressBar: document.getElementById('progressBar'),
+                timerText: document.getElementById('timerText'),
+                statusMessage: document.getElementById('statusMessage'), // Status Text
+                reviewInput: document.getElementById('reviewInput'),   // Text Area
+                tagsContainer: document.getElementById('tagsContainer'),
+                copyBtn: document.getElementById('copyBtn'),
+                smsLink: document.getElementById('smsLink'),
+                waLink: document.getElementById('waLink'),
+                headerSection: document.getElementById('headerSection')
+            };
+
+            /* ================= SETUP CANVAS ================= */
+            const ctx = els.wheelCanvas.getContext('2d');
+            const centerX = 160;
+            const centerY = 160;
+            const radius = 160;
+            const PI = Math.PI;
+            const TAU = 2 * PI;
+            const arc = TAU / CONFIG.prizes.length;
+            
+            let currentRotation = 0;
+
+            /* ================= FUNCTIONS ================= */
+
+            // 1. Draw Wheel
+            function drawWheel() {
+                CONFIG.prizes.forEach((prize, i) => {
+                    const angle = i * arc - PI / 2;
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY);
+                    ctx.arc(centerX, centerY, radius, angle, angle + arc);
+                    ctx.fillStyle = prize.color;
+                    ctx.fill();
+                    ctx.stroke();
+                    ctx.strokeStyle = "white";
+                    ctx.lineWidth = 2;
+
+                    ctx.save();
+                    ctx.translate(centerX, centerY);
+                    ctx.rotate(angle + arc / 2);
+                    ctx.textAlign = "right";
+                    ctx.fillStyle = prize.text;
+                    ctx.font = "bold 14px Poppins";
+                    ctx.fillText(prize.label, radius - 20, 5);
+                    ctx.restore();
+                });
             }
-            return 0;
-        }
 
-        // --- 3. SPIN HANDLER ---
-        spinBtn.addEventListener('click', () => {
-            // Disable button immediately
-            spinBtn.disabled = true;
-            spinBtn.classList.add('opacity-50', 'cursor-not-allowed');
-            spinBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-2"></i> SPINNING...';
+            // 2. Render Review Tags (Appends to Text Area)
+            function renderTags() {
+                els.tagsContainer.innerHTML = '';
+                CONFIG.reviewTags.forEach(tag => {
+                    const btn = document.createElement('button');
+                    btn.className = "px-3 py-1 text-xs border border-slate-300 rounded-full text-slate-500 hover:bg-orange-100 hover:text-orange-600 hover:border-orange-300 transition-colors select-none";
+                    btn.innerText = tag;
+                    
+                    btn.onclick = () => {
+                        // Visual feedback (Flash effect)
+                        btn.classList.add('bg-orange-200');
+                        setTimeout(() => btn.classList.remove('bg-orange-200'), 200);
 
-            const winningIndex = getWeightedWinner();
-            
-            // Calculate Rotation
-            const segmentAngle = 360 / PRIZES.length;
-            const randomOffset = (Math.random() * segmentAngle * 0.8) - (segmentAngle * 0.4);
-            const winningAnglePosition = winningIndex * segmentAngle; 
-            
-            // Spin 5 times (1800deg) + Angle to target
-            const targetRotation = (360 * 5) + (360 - winningAnglePosition) + randomOffset;
-            const currentMod = currentRotation % 360;
-            currentRotation = currentRotation - currentMod + targetRotation;
+                        // Auto-fill logic
+                        let currentText = els.reviewInput.value;
+                        if (currentText.length > 0 && !currentText.endsWith(' ')) {
+                            currentText += ", "; // Add comma if text exists
+                        }
+                        els.reviewInput.value = currentText + tag;
+                    };
+                    els.tagsContainer.appendChild(btn);
+                });
+            }
 
-            // Apply CSS Transform
-            canvas.style.transform = `rotate(${currentRotation}deg)`;
+            // 3. Logic for Weighted Random
+            function getWeightedWinner() {
+                const total = CONFIG.prizes.reduce((sum, p) => sum + p.percent, 0);
+                let r = Math.random() * total;
+                for (let i = 0; i < CONFIG.prizes.length; i++) {
+                    if (r < CONFIG.prizes[i].percent) return i;
+                    r -= CONFIG.prizes[i].percent;
+                }
+                return 0;
+            }
 
-            // Wait for animation (4s)
-            setTimeout(() => {
-                showResult(PRIZES[winningIndex].label);
+            // 4. Modal & Progress Logic
+            function openModal(prizeName, isReplay = false) {
+                els.prizeResult.innerText = prizeName;
                 
-                // Update Button State to "Claimed"
-                spinBtn.innerHTML = '<i class="fa-solid fa-check mr-2"></i> CLAIMED';
-            }, 4000);
+                // Prepare Links
+                const msg = `Hello! I won [${prizeName}] and reviewed on Amazon.`;
+                const encoded = encodeURIComponent(msg);
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                els.smsLink.href = `sms:${CONFIG.shopPhone}${isIOS ? '&' : '?'}body=${encoded}`;
+                els.waLink.href = `https://wa.me/${CONFIG.shopPhone.replace(/\D/g, '')}?text=${encoded}`;
+
+                // Show Modal
+                els.modal.classList.remove('hidden');
+
+                if (!isReplay) {
+                    // Start Timer
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+                    
+                    els.progressBar.style.transition = `width ${CONFIG.timerSeconds}s linear`;
+                    setTimeout(() => { els.progressBar.style.width = '100%'; }, 50);
+
+                    // Countdown Text
+                    let timeLeft = CONFIG.timerSeconds;
+                    els.timerText.innerText = timeLeft + "s";
+                    
+                    const timer = setInterval(() => {
+                        timeLeft--;
+                        els.timerText.innerText = timeLeft + "s";
+                        if(timeLeft <= 0) {
+                            clearInterval(timer);
+                            els.timerText.innerText = "Done";
+                            finishProcessing(); // Change text and enable buttons
+                        }
+                    }, 1000);
+                } else {
+                    // Instant Show for Replay
+                    els.progressBar.style.transition = 'none';
+                    els.progressBar.style.width = '100%';
+                    els.timerText.innerText = "Done";
+                    finishProcessing();
+                }
+            }
+
+            function finishProcessing() {
+                // Enable Buttons
+                els.smsLink.classList.remove('btn-disabled');
+                els.waLink.classList.remove('btn-disabled');
+                els.smsLink.classList.add('animate-bounce');
+                els.waLink.classList.add('animate-bounce');
+
+                // Change Status Text
+                els.statusMessage.innerHTML = '<i class="fa-solid fa-check-circle"></i> Your reward code has been created, claim now!';
+                els.statusMessage.classList.remove('animate-pulse', 'text-blue-500');
+                els.statusMessage.classList.add('fade-in-green');
+            }
+
+            /* ================= EVENT LISTENERS ================= */
+
+            els.spinBtn.onclick = () => {
+                els.spinBtn.disabled = true;
+                els.spinBtn.innerHTML = "SPINNING...";
+                
+                const winnerIndex = getWeightedWinner();
+                const segmentAngle = 360 / CONFIG.prizes.length;
+                const randomOffset = (Math.random() * segmentAngle * 0.8) - (segmentAngle * 0.4);
+                const winningAnglePosition = winnerIndex * segmentAngle;
+                const targetRotation = (360 * 5) + (360 - winningAnglePosition) + randomOffset;
+                
+                const currentMod = currentRotation % 360;
+                currentRotation = currentRotation - currentMod + targetRotation;
+
+                els.wheelCanvas.style.transform = `rotate(${currentRotation}deg)`;
+
+                setTimeout(() => {
+                    const prizeName = CONFIG.prizes[winnerIndex].label;
+                    localStorage.setItem('luckyWheel_hasSpun', 'true');
+                    localStorage.setItem('luckyWheel_prize', prizeName);
+                    openModal(prizeName, false);
+                }, 4000);
+            };
+
+            // Copy Button Logic (Copies Text Area Content)
+            els.copyBtn.onclick = () => {
+                const text = els.reviewInput.value;
+                
+                if (!text.trim()) {
+                    alert("Please write a review or click tags first!");
+                    els.reviewInput.focus();
+                    return;
+                }
+                
+                navigator.clipboard.writeText(text).then(() => {
+                    const oldHTML = els.copyBtn.innerHTML;
+                    els.copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+                    els.copyBtn.classList.add('bg-green-500');
+                    setTimeout(() => {
+                        els.copyBtn.innerHTML = oldHTML;
+                        els.copyBtn.classList.remove('bg-green-500');
+                    }, 2000);
+                    window.open(CONFIG.amazonUrl, '_blank');
+                });
+            };
+            
+            els.viewRewardBtn.onclick = () => {
+                const storedPrize = localStorage.getItem('luckyWheel_prize') || "Unknown Prize";
+                openModal(storedPrize, true);
+            };
+
+            /* ================= INITIALIZATION ================= */
+            const hasSpun = localStorage.getItem('luckyWheel_hasSpun');
+            
+            if (hasSpun === 'true') {
+                els.wheelSection.classList.add('hidden');
+                els.headerSection.classList.add('hidden');
+                els.alreadySpunMsg.classList.remove('hidden');
+            } else {
+                drawWheel();
+                renderTags();
+            }
         });
 
-        // --- 4. SHOW RESULT & GENERATE LINKS ---
-        function showResult(prizeName) {
-            prizeResultText.innerText = prizeName;
-
-            // Confetti Effect (Only if it's not a "Miss")
-            if (!prizeName.toLowerCase().includes("good luck") && !prizeName.toLowerCase().includes("try again")) {
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        // Global Reset Function for Testing
+        function resetApp() {
+            if(confirm("Reset the app logic? (This will clear local storage)")) {
+                localStorage.removeItem('luckyWheel_hasSpun');
+                localStorage.removeItem('luckyWheel_prize');
+                location.reload();
             }
-
-            // Message Content
-            const message = `Hello Shop, I just won [${prizeName}] on the Lucky Wheel. Please claim my reward!`;
-            const encodedMsg = encodeURIComponent(message);
-            
-            // --- A. SMS LINK ---
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-            const delimiter = isIOS ? '&' : '?';
-            smsLinkBtn.href = `sms:${SHOP_PHONE_NUMBER}${delimiter}body=${encodedMsg}`;
-
-            // --- B. WHATSAPP LINK ---
-            // Ensure phone number is clean (no spaces, no +)
-            let waPhone = SHOP_PHONE_NUMBER.replace(/\D/g, ''); 
-            waLinkBtn.href = `https://wa.me/${waPhone}?text=${encodedMsg}`;
-
-            // Show Modal
-            modal.classList.remove('hidden');
-        }
-
-        function closeModal() {
-            modal.classList.add('hidden');
         }
     </script>
 </body>
