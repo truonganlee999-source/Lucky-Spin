@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         try {
             // Giữ nguyên API của bạn
-            const response = await fetch('http://localhost:3000/api/spin');
+            const response = await fetch('/api/spin');
             if (!response.ok) throw new Error("API Error");
             
             const data = await response.json();
@@ -306,3 +306,4 @@ function resetApp() {
         location.reload();
     }
 }
+
