@@ -201,7 +201,7 @@ document.addEventListener("DOMContentLoaded", () => {
         
         try {
             // Keep your API unchanged
-            const response = await fetch('http://localhost:3000/api/spin');
+            const response = await fetch('/api/spin');
             if (!response.ok) throw new Error("API Error");
             
             const data = await response.json();
@@ -305,4 +305,5 @@ function resetApp() {
         localStorage.removeItem('luckyWheel_prize');
         location.reload();
     }
+
 }
